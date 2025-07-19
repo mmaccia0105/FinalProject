@@ -1,0 +1,298 @@
+---
+title: "Exploratory Data Analysis"
+format: html
+author: Mike Maccia
+editor: visual
+---
+
+## Introduction to Diabetes
+
+Diabetes is a significant chronic medical condition which is becoming more and more prevalent in the United States. When people develop diabetes, they cannot regulate their blood glucose normally, which leads to reduced quality of life. When diabetes is not controlled, through diet and exercise, it can lead to additional medical problems. The main mechanism by which diabetes occurs, is that in a normal body, insulin is used to break down sugars from food into energy. In patients with diabetes, insulin is either not produced or does not work as normal leading to increase blood glucose. There are 2 types of diabetes.
+
+-   Type 1 is normally genetic and the body does not produce insulin
+-   Type 2 is normally developed throughout life and while the body may produce insulin, it does not work as it should
+
+Additionally, diabetes can lead to cardiovascular and kidney complications. Also, patients are at risk for poor eyesight and wound healing.
+
+Diabetes continues to increase with upwards of 34 million people with diabetes and upwards of 88 million with pre-diabetes. Type 2 diabetes is really the version of concern, since its prevalence varies by age, education level, income status, location, race, and many other Social Drivers of Health (SDOH).
+
+## Data of Concern
+
+The data explored through this analysis comes from the Behavioral Risk Factor Surveilance System (BRFSS); a telephone survey collected through the CDC annually. It has been conducted every year since 1984 and targets over 400,000 Americans. This data we will focus on is from the 2015 survey of 441,455 individuals with 330 feature.
+
+The specific dataset to explore is titled `diabetes_binary_health_indicators_BRFSS2015.csv`.
+
+This specific set is of 253,680 responses. Here, the target variable is `Diabetes_binary` where `0` indicates no diabetes and `1` indicates the presence of diabetes or prediabetes. Overall, there are 21 variables.
+
+## Variables to Explore Through Exploratory Data Analysis (EDA) & Modeling
+
+### *Target Variable:*
+
+-   `Diabetes_binary`
+    -   `0` = No Diabetes
+    -   `1` = Diabetes or Prediabetes
+
+### *Predictor Variables:*
+
+-   `PhysActivity`: Did the subject have physical activity within the past 30 days (excluding job activities)
+    -   `0` = No
+    -   `1` = Yes
+-   `Veggies`: Did the subject consume 1 or more vegetables in the past 30 days
+    -   `0` = No
+    -   `1` = Yes
+-   `HvyAlcoholConsump`: Did the subject consume ≥ 14 (male) or ≥ 7 (female) drinks per week
+    -   `0` = No
+    -   `1` = Yes
+-   `BMI`: Body Mass Index (will later create as a factor and breakdown the categories based on the CDC definition)
+    -   \< 18.5 kg/m\^2 = Underweight
+
+    -   18.5 to \< 25 kg/m\^2 = Healthy Weight
+
+    -   25 to \< 30 kg/m\^2 = Overweight
+
+    -   30 to \< 35 kg/m\^2 = Class 1 Obesity
+
+    -   35 to 40 kg/m\^2 = Class 2 Obesity
+
+    -   \> 40 kg/m\^2 = Severe Obesity
+
+### *Choice of Variables:*
+
+For my modeling, I decided on the above 4 variables. As a pharmacist, I know how the affect of some of these variables would affect someone's development of prediabetes and diabetes. Diet and exercise are some of the most important factors that a patient has direct control of, which can either lower or increase their risk of development of diabetes. As a result, I chose whether or not the subject has physical activity to indicate whether or not they live a sedentary lifestyle. Then I decided on their vegetable and alcohol consumption as addition variables to consider. If a patient increased their vegetable intake and / or decreased alcohol intake, they likely can reduce their risk of diabetes. Finally, I did choose BMI as a 4th variable. This is another factor a patient has control over and can lead to diabetes if they have higher BMIs. I also wanted at least 1 variable to be more than just binary, so BMI will be later converted to categories.
+
+## Purpose of this EDA and Model
+
+The purpose of this EDA is to explore some patients variables, through a survey, which may be associated with someone's development of prediabetes or diabetes. We want to examine our chosen variables to see if maybe visualize some relationships between the variables. Before modeling our data, we can also visualize some summary statistics to understand the composition of our subjects from this survey.
+
+After, we would then want to evaluate some different models, to identify the best one that can be used to predict if someone has prediabetes or diabetes. Different models will be evaluated since we want to create one that is accurate and is able to perform well on new data we provide, for example a different year of the survey. Ideally, a fit model would have lower error metrics and high accuracy.
+
+## Data Import/Clean Up
+
+Will first put some code for our needed packages:
+
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
+
+```
+
+Let's import the data:
+
+```{r}
+diabetes_data_df <- read.csv("~/ST558 Repo/FinalProject/diabetes_binary_health_indicators_BRFSS2015.csv", header = TRUE)
+diabetes_data <- as.tibble(diabetes_data_df) #convert to a tibble, likely needed later
+diabetes_data
+```
+
+Now that the data has been imported, lets look at the structure of the data and then check if there are any missing values.
+
+```{r}
+str(diabetes_data)
+colSums(is.na(diabetes_data))
+```
+
+Great, it looks like there are no missing values. Unfortunately all of the variables are number, but really the majority are binary. Since we are only going to evaluate a few of the variables from the survey, the next step will be to select out those variables and do some manipulation on them alone.
+
+```{r}
+diabetes_data_selected <- diabetes_data |> 
+  select(Diabetes_binary, BMI, Veggies, PhysActivity, HvyAlcoholConsump)
+
+str(diabetes_data_selected)
+```
+
+Now to make the data more readable, we will convert the variables to factors. The meaning of the 0 and 1's was described above. Additionally, the categories for BMI are above.
+
+```{r}
+diabetes_summarize <- diabetes_data_selected |> 
+  #create factors of the binary variables
+  mutate(diabetes = factor(Diabetes_binary, levels = c(0,1), #create factors of the binary variables
+                             labels = c("No", "Yes")),
+         veggies = factor(Veggies, levels = c(0,1), 
+                          labels = c("No", "Yes")),
+         exercise = factor(PhysActivity, levels = c(0,1),
+                           labels = c("No", "Yes")),
+         alcohol_use = factor(HvyAlcoholConsump, levels = c(0,1),
+                        labels = c("No", "Yes"))) |> 
+  #creating a factor for BMI, need to figure make categories then factor so will do separately for ease of code
+  #want factor so they are ordered appropriate during analysis
+  mutate(BMI_category = case_when(
+    BMI < 18.5 ~ "Underweight",
+    BMI >= 18.5 & BMI < 25 ~ "Healthy Weight",
+    BMI >= 25 & BMI < 30 ~ "Overweight",
+    BMI >= 30 & BMI < 35 ~ "Class 1 Obesity",
+    BMI >= 35 & BMI <=40 ~ "Class 2 Obesity",
+    BMI > 40 ~ "Severe Obesity")) |> 
+  mutate(bmi = factor(BMI_category, levels = c(
+      "Underweight",
+      "Healthy Weight",
+      "Overweight",
+      "Class 1 Obesity",
+      "Class 2 Obesity",
+      "Severe Obesity"
+    ), ordered = TRUE)
+  ) |> 
+  select(diabetes, veggies, exercise, alcohol_use, bmi)
+            
+
+str(diabetes_summarize)
+diabetes_summarize
+```
+
+## Summary of the Date
+
+Let's first just do some initial counting.
+
+#### Presence or Absence of Diabetes
+
+```{r}
+diabetes_summarize |> 
+  count(diabetes) |> 
+  mutate(percent = round(n / sum(n) * 100, 2))
+```
+
+This breakdown actually surprises me. I thought the presence of prediabetes or diabetes in this survey would've been higher.
+
+#### Does the subject eat vegetables?
+
+```{r}
+diabetes_summarize |> 
+  count(veggies) |> 
+  mutate(percent = round(n / sum(n) * 100, 2))
+```
+
+This is not necessarily surprising that the majority eat vegetables at least 1 time per day. Based on the information provided, it does not quantify a certain amount, just 1 time.
+
+#### Does the subject perform physical activity?
+
+```{r}
+diabetes_summarize |> 
+  count(exercise) |> 
+  mutate(percent = round(n / sum(n) * 100, 2))
+```
+
+This is physical activity within 30 days. Similar to vegetables, it does not quantify, so these numbers make sense. I imagine if it asked more than 5 - 10 times a month, or at least 150 minutes per week, then the percent "Yes" would likely decline.
+
+#### Presence of Excessive Alcohol Use
+
+```{r}
+diabetes_summarize |> 
+  count(alcohol_use) |> 
+  mutate(percent = round(n / sum(n) * 100, 2))
+```
+
+This amount who drink excessively is not surprising. This variable actually quantifies things better than the previous 2.
+
+#### Summary of BMI Categories
+
+```{r}
+diabetes_summarize |> 
+  count(bmi) |> 
+  mutate(percent = round(n / sum(n) * 100, 2))
+```
+
+```{r}
+ggplot(diabetes_summarize, aes(bmi, fill = bmi))+
+         geom_bar() +
+  labs(x = "BMI Category",
+       y = "Count",
+       title = "Frequency of BMI by Category") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+This is a nice distribution of BMI categories. The lower level of diabetes in the overall population would tell me that overall the BMIs should rather normal (Healthy Weight/Overweight). I think the overweight range of \> 25 to 30 kg/m\^2 BMI is not the greatest label set by the CDC.
+
+### Bar Graphs to Visual Proportions of Some Categorizations
+
+Now that we have looked at each variable separately let's look at some frequencies of people with and without diabetes in some of the categories. For this one, let's look at diabetes frequency based on physical activity, heavy alcohol use, and BMI cateogory. Will exclude vegetable consumption here since a large majority of subjects consume them.
+
+```{r}
+diabetes_exercise <- diabetes_summarize |> 
+  count(diabetes, exercise) |> 
+  mutate(percent = round(n / sum(n) * 100, 2))
+
+diabetes_exercise
+
+ggplot(diabetes_exercise, aes(x = diabetes, y = percent, fill = exercise)) +
+  geom_bar(stat = "identity", position = "stack") +
+  geom_text(aes(label = paste0(percent, "%")),
+            position = position_stack(vjust = 0.5),
+            vjust = -0.3, size = 4) +
+  labs(
+    x = "Diabetes",
+    y = "Percentage",
+    title = "Physical Activity by Diabetes",
+    fill = "Physical Activity within 30 Days"
+  ) +
+  scale_fill_manual(values = c("No" = "green", "Yes" = "yellow")) +
+  theme_minimal()
+```
+
+I think looking at this graph, I am not sure this helps to figure out whether physical activity is associated with the absence of diabetes. In patients without, it is clear a large majority have physical activity within the past 30 days. When looking at subjects with diabetes, more did have physical activity then did not. As stated before, since this is not really quantifed as more than just physical activity within 30 days, it may not be as helpful as something that quantifies better.
+
+```{r}
+diabetes_alcohol_use <- diabetes_summarize |> 
+  count(diabetes, alcohol_use) |> 
+  mutate(percent = round(n / sum(n) * 100, 2))
+
+diabetes_alcohol_use
+
+ggplot(diabetes_alcohol_use, aes(x = diabetes, y = percent, fill = alcohol_use)) +
+  geom_bar(stat = "identity", position = "stack") +
+  geom_text(aes(label = paste0(percent, "%")),
+            position = position_stack(vjust = 0.5),
+            vjust = -0.3, size = 4) +
+  labs(
+    x = "Diabetes",
+    y = "Percentage",
+    title = "Alcohol Use by Presence or Absence of Diabetes",
+    fill = "Heavy Alcohol Use"
+  ) +
+  scale_fill_manual(values = c("No" = "orange", "Yes" = "blue")) +
+  theme_minimal()
+```
+
+Since there was minimal heavy alcohol use within this population, this graph may not tell us much. There is overall a small percentage of heavy alcohol use in the diabetes group.
+
+```{r}
+diabetes_bmi_cat <- diabetes_summarize |> 
+  count(diabetes, bmi) |> 
+  mutate(percent = round(n / sum(n) * 100, 2))
+
+diabetes_bmi_cat
+
+ggplot(diabetes_bmi_cat, aes(x = bmi, y = percent, fill = diabetes)) +
+  geom_bar(stat = "identity", position = "stack") +
+  geom_text(aes(label = paste0(percent, "%")),
+            position = position_stack(vjust = 0.5),
+            vjust = -0.3, size = 4) +
+  labs(
+    x = "BMI Category",
+    y = "Percentage",
+    title = "Diabetes Presence by BMI Category",
+    fill = "Diabetes Status"
+  ) +
+  scale_fill_discrete() +
+  theme_minimal()
+```
+
+As expected, when looking at the percent of subjects within each BMI category, there are higher proportions of subjects with diabetes in the higher BMI categories.
+
+### Scatter Plot to Visual Diabetes Probability based on BMI
+
+Finally, lets look at a few scatter plots to see if we can visual some relationships a bit better than just the bar graphs.
+
+```{r}
+#need to convert BMI to numeric. Also need to take the diabetes factor and convert to numeric for
+#plotting reasons
+ggplot(diabetes_summarize, aes(x = as.numeric(bmi), y = as.numeric(diabetes == "Yes"))) + 
+  #plot a logistic line below
+  geom_smooth(method = "glm", method.args = list(family = "binomial"), se = FALSE) +
+  #creating our bmi categories as numeric for better plotting
+  scale_x_continuous(breaks = 1:6, labels = levels(diabetes_summarize$bmi)) +
+  labs(title = "Probability of Diabetes by BMI Category",
+       x = "BMI Category",
+       y = "Probability of Diabetes") +
+  theme_minimal()
+```
+This graphs help with some of our modeling ideas. Plotting a logistic line comparing the probability of having diabetes based on BMI category, as BMI increases, the likelihood of diabetes increases, which makes sense. 
+
