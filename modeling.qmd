@@ -7,8 +7,75 @@ editor: visual
 
 ## Introduction to Our Model
 
-### Splitting our Data
+On the EDA page, diabetes was described and we did some exploring of the data. Our ultimate goal of this project is to create some predictive models for patients who may have prediabetes or diabetes. This is based off of data from a survey conducted by the CDC yearly, but this specific data is from 2015.
+
+Overall, there were 21 variables, but it was decided to select only 4 to utilize as our predictors.
+
+The variables are now (this is utilizing the renamed variables):
+
+-   `exercise`: Did the subject have physical activity within the past 30 days (excluding job activities)
+
+-   `veggies`: Did the subject consume 1 or more vegetables in the past 30 days
+
+-   `alcohol_use`: Did the subject consume ≥ 14 (male) or ≥ 7 (female) drinks per week
+
+-   `bmi`: Body Mass Index (classifications below)
+
+    -   \< 18.5 kg/m\^2 = Underweight
+
+    -   18.5 to \< 25 kg/m\^2 = Healthy Weight
+
+    -   25 to \< 30 kg/m\^2 = Overweight
+
+    -   30 to \< 35 kg/m\^2 = Class 1 Obesity
+
+    -   35 to 40 kg/m\^2 = Class 2 Obesity
+
+    -   \> 40 kg/m\^2 = Severe Obesity \### Splitting our Data
+    
+## Loading Packages
+
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(tidymodels))
+suppressPackageStartupMessages(library(caret))
+```
+
+## Setting up the Data for Modeling
+
+We will use a 70/30 split of our data to create training and testing data. 
 
 ```{r}
 set.seed(145) 
+diabetes_split <- initial_split(diabetes_summarize, prop = 0.7)
+
+training_diabetes <- training(diabetes_split)
+testing_diabetes <- testing(diabetes_split)
+
 ```
+
+For all models we are going to evaluate, we are going to use `logLoss` as our `metric`. To select the best model, we will also perform a 5 fold cross-validation. 
+
+```{r}
+cv_5 <- trainControl(method = "cv", number = 5) 
+```
+
+## Logistic Regression Models:
+
+### Defining what Logistic Regression Models Are:
+
+### Why should Logistric Regression Models be applied to our Diabetes Data?
+
+## Classification Tree:
+
+### Defining what Classification Tree Models Are:
+
+### Why could we consider Classification Trees with our data?
+
+## Random Forest:
+
+### Defining what Random Forest Models Are:
+
+### Why could we consider Random Forests with our data?
+
+## Comparing the 3 Models and Selecting the Best Model
