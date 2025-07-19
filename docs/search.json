@@ -53,13 +53,55 @@
     "href": "modeling.html",
     "title": "Modeling Diabetes",
     "section": "",
-    "text": "set.seed(145)"
+    "text": "On the EDA page, diabetes was described and we did some exploring of the data. Our ultimate goal of this project is to create some predictive models for patients who may have prediabetes or diabetes. This is based off of data from a survey conducted by the CDC yearly, but this specific data is from 2015.\nOverall, there were 21 variables, but it was decided to select only 4 to utilize as our predictors.\nThe variables are now (this is utilizing the renamed variables):\n\nexercise: Did the subject have physical activity within the past 30 days (excluding job activities)\nveggies: Did the subject consume 1 or more vegetables in the past 30 days\nalcohol_use: Did the subject consume ≥ 14 (male) or ≥ 7 (female) drinks per week\nbmi: Body Mass Index (classifications below)\n\n&lt; 18.5 kg/m^2 = Underweight\n18.5 to &lt; 25 kg/m^2 = Healthy Weight\n25 to &lt; 30 kg/m^2 = Overweight\n30 to &lt; 35 kg/m^2 = Class 1 Obesity\n35 to 40 kg/m^2 = Class 2 Obesity\n&gt; 40 kg/m^2 = Severe Obesity ### Splitting our Data"
   },
   {
     "objectID": "modeling.html#introduction-to-our-model",
     "href": "modeling.html#introduction-to-our-model",
     "title": "Modeling Diabetes",
     "section": "",
-    "text": "set.seed(145)"
+    "text": "On the EDA page, diabetes was described and we did some exploring of the data. Our ultimate goal of this project is to create some predictive models for patients who may have prediabetes or diabetes. This is based off of data from a survey conducted by the CDC yearly, but this specific data is from 2015.\nOverall, there were 21 variables, but it was decided to select only 4 to utilize as our predictors.\nThe variables are now (this is utilizing the renamed variables):\n\nexercise: Did the subject have physical activity within the past 30 days (excluding job activities)\nveggies: Did the subject consume 1 or more vegetables in the past 30 days\nalcohol_use: Did the subject consume ≥ 14 (male) or ≥ 7 (female) drinks per week\nbmi: Body Mass Index (classifications below)\n\n&lt; 18.5 kg/m^2 = Underweight\n18.5 to &lt; 25 kg/m^2 = Healthy Weight\n25 to &lt; 30 kg/m^2 = Overweight\n30 to &lt; 35 kg/m^2 = Class 1 Obesity\n35 to 40 kg/m^2 = Class 2 Obesity\n&gt; 40 kg/m^2 = Severe Obesity ### Splitting our Data"
+  },
+  {
+    "objectID": "modeling.html#loading-packages",
+    "href": "modeling.html#loading-packages",
+    "title": "Modeling Diabetes",
+    "section": "Loading Packages",
+    "text": "Loading Packages\n\nsuppressPackageStartupMessages(library(tidyverse))\nsuppressPackageStartupMessages(library(tidymodels))\nsuppressPackageStartupMessages(library(caret))"
+  },
+  {
+    "objectID": "modeling.html#setting-up-the-data-for-modeling",
+    "href": "modeling.html#setting-up-the-data-for-modeling",
+    "title": "Modeling Diabetes",
+    "section": "Setting up the Data for Modeling",
+    "text": "Setting up the Data for Modeling\nWe will use a 70/30 split of our data to create training and testing data.\n\nset.seed(145) \n#diabetes_split &lt;- initial_split(diabetes_summarize, prop = 0.7)\n\n#training_diabetes &lt;- training(diabetes_split)\n#testing_diabetes &lt;- testing(diabetes_split)\n\nFor all models we are going to evaluate, we are going to use logLoss as our metric. To select the best model, we will also perform a 5 fold cross-validation.\n\n#cv_5 &lt;- trainControl(method = \"cv\", number = 5)"
+  },
+  {
+    "objectID": "modeling.html#logistic-regression-models",
+    "href": "modeling.html#logistic-regression-models",
+    "title": "Modeling Diabetes",
+    "section": "Logistic Regression Models:",
+    "text": "Logistic Regression Models:\n\nDefining what Logistic Regression Models Are:\n\n\nWhy should Logistric Regression Models be applied to our Diabetes Data?"
+  },
+  {
+    "objectID": "modeling.html#classification-tree",
+    "href": "modeling.html#classification-tree",
+    "title": "Modeling Diabetes",
+    "section": "Classification Tree:",
+    "text": "Classification Tree:\n\nDefining what Classification Tree Models Are:\n\n\nWhy could we consider Classification Trees with our data?"
+  },
+  {
+    "objectID": "modeling.html#random-forest",
+    "href": "modeling.html#random-forest",
+    "title": "Modeling Diabetes",
+    "section": "Random Forest:",
+    "text": "Random Forest:\n\nDefining what Random Forest Models Are:\n\n\nWhy could we consider Random Forests with our data?"
+  },
+  {
+    "objectID": "modeling.html#comparing-the-3-models-and-selecting-the-best-model",
+    "href": "modeling.html#comparing-the-3-models-and-selecting-the-best-model",
+    "title": "Modeling Diabetes",
+    "section": "Comparing the 3 Models and Selecting the Best Model",
+    "text": "Comparing the 3 Models and Selecting the Best Model"
   }
 ]

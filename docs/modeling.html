@@ -142,14 +142,78 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="introduction-to-our-model" class="level2">
 <h2 class="anchored" data-anchor-id="introduction-to-our-model">Introduction to Our Model</h2>
-<section id="splitting-our-data" class="level3">
-<h3 class="anchored" data-anchor-id="splitting-our-data">Splitting our Data</h3>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">145</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-
-
+<p>On the EDA page, diabetes was described and we did some exploring of the data. Our ultimate goal of this project is to create some predictive models for patients who may have prediabetes or diabetes. This is based off of data from a survey conducted by the CDC yearly, but this specific data is from 2015.</p>
+<p>Overall, there were 21 variables, but it was decided to select only 4 to utilize as our predictors.</p>
+<p>The variables are now (this is utilizing the renamed variables):</p>
+<ul>
+<li><p><code>exercise</code>: Did the subject have physical activity within the past 30 days (excluding job activities)</p></li>
+<li><p><code>veggies</code>: Did the subject consume 1 or more vegetables in the past 30 days</p></li>
+<li><p><code>alcohol_use</code>: Did the subject consume ≥ 14 (male) or ≥ 7 (female) drinks per week</p></li>
+<li><p><code>bmi</code>: Body Mass Index (classifications below)</p>
+<ul>
+<li><p>&lt; 18.5 kg/m^2 = Underweight</p></li>
+<li><p>18.5 to &lt; 25 kg/m^2 = Healthy Weight</p></li>
+<li><p>25 to &lt; 30 kg/m^2 = Overweight</p></li>
+<li><p>30 to &lt; 35 kg/m^2 = Class 1 Obesity</p></li>
+<li><p>35 to 40 kg/m^2 = Class 2 Obesity</p></li>
+<li><p>&gt; 40 kg/m^2 = Severe Obesity ### Splitting our Data</p></li>
+</ul></li>
+</ul>
 </section>
+<section id="loading-packages" class="level2">
+<h2 class="anchored" data-anchor-id="loading-packages">Loading Packages</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>(<span class="fu">library</span>(tidyverse))</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>(<span class="fu">library</span>(tidymodels))</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>(<span class="fu">library</span>(caret))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="setting-up-the-data-for-modeling" class="level2">
+<h2 class="anchored" data-anchor-id="setting-up-the-data-for-modeling">Setting up the Data for Modeling</h2>
+<p>We will use a 70/30 split of our data to create training and testing data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">145</span>) </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#diabetes_split &lt;- initial_split(diabetes_summarize, prop = 0.7)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#training_diabetes &lt;- training(diabetes_split)</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#testing_diabetes &lt;- testing(diabetes_split)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>For all models we are going to evaluate, we are going to use <code>logLoss</code> as our <code>metric</code>. To select the best model, we will also perform a 5 fold cross-validation.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#cv_5 &lt;- trainControl(method = "cv", number = 5) </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="logistic-regression-models" class="level2">
+<h2 class="anchored" data-anchor-id="logistic-regression-models">Logistic Regression Models:</h2>
+<section id="defining-what-logistic-regression-models-are" class="level3">
+<h3 class="anchored" data-anchor-id="defining-what-logistic-regression-models-are">Defining what Logistic Regression Models Are:</h3>
+</section>
+<section id="why-should-logistric-regression-models-be-applied-to-our-diabetes-data" class="level3">
+<h3 class="anchored" data-anchor-id="why-should-logistric-regression-models-be-applied-to-our-diabetes-data">Why should Logistric Regression Models be applied to our Diabetes Data?</h3>
+</section>
+</section>
+<section id="classification-tree" class="level2">
+<h2 class="anchored" data-anchor-id="classification-tree">Classification Tree:</h2>
+<section id="defining-what-classification-tree-models-are" class="level3">
+<h3 class="anchored" data-anchor-id="defining-what-classification-tree-models-are">Defining what Classification Tree Models Are:</h3>
+</section>
+<section id="why-could-we-consider-classification-trees-with-our-data" class="level3">
+<h3 class="anchored" data-anchor-id="why-could-we-consider-classification-trees-with-our-data">Why could we consider Classification Trees with our data?</h3>
+</section>
+</section>
+<section id="random-forest" class="level2">
+<h2 class="anchored" data-anchor-id="random-forest">Random Forest:</h2>
+<section id="defining-what-random-forest-models-are" class="level3">
+<h3 class="anchored" data-anchor-id="defining-what-random-forest-models-are">Defining what Random Forest Models Are:</h3>
+</section>
+<section id="why-could-we-consider-random-forests-with-our-data" class="level3">
+<h3 class="anchored" data-anchor-id="why-could-we-consider-random-forests-with-our-data">Why could we consider Random Forests with our data?</h3>
+</section>
+</section>
+<section id="comparing-the-3-models-and-selecting-the-best-model" class="level2">
+<h2 class="anchored" data-anchor-id="comparing-the-3-models-and-selecting-the-best-model">Comparing the 3 Models and Selecting the Best Model</h2>
+
+
 </section>
 
 </main> <!-- /main -->
