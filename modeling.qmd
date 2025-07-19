@@ -1,0 +1,14 @@
+---
+title: "Modeling Diabetes"
+format: html
+author: Mike Maccia
+editor: visual
+---
+
+## Introduction to Our Model
+
+### Splitting our Data
+
+```{r}
+set.seed(145) 
+```
