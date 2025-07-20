@@ -81,21 +81,21 @@
     "href": "modeling.html#logistic-regression-models",
     "title": "Modeling Diabetes",
     "section": "Logistic Regression Models:",
-    "text": "Logistic Regression Models:\n\nDefining what Logistic Regression Models Are:\n\n\nWhy should Logistric Regression Models be applied to our Diabetes Data?"
+    "text": "Logistic Regression Models:\n\nDefining what Logistic Regression Models Are:\nLogistic Regression Models are used when we have a binary response variable and we are performing a classification task. Since we are targeting a response that is a success vs. failure (or yes vs. no), we are modeling the probability of the response given some prediction variables.\nWhen modeling the probability in the case of logistic regression, predictions would be between 0 and 1. The log-odds of the event is what is plotted during a logistic regression model.\nIn logistic regression, we are not trying to predict an actual value, but the probability of the response variable occurring.\nPredictors can be either numeric or categorical when performing a logistic regression. If using a numeric predictor, it should be centered and scaled prior to fitting the model.\n\n\nWhy should Logistic Regression Models be applied to our Diabetes Data?\nWe can apply a logistic regression model for our diabetes response variable since it is binary. The outcome is either a subject has prediabetes/diabetes or they do not. The goal of our model is to use prediction variables to identify the probability a subject will have the response variable of the disease."
   },
   {
     "objectID": "modeling.html#classification-tree",
     "href": "modeling.html#classification-tree",
     "title": "Modeling Diabetes",
     "section": "Classification Tree:",
-    "text": "Classification Tree:\n\nDefining what Classification Tree Models Are:\n\n\nWhy could we consider Classification Trees with our data?"
+    "text": "Classification Tree:\n\nDefining what Classification Tree Models Are:\nClassification trees are used to classify a group membership, or in other words, predict whether a binary outcome will occur. Basically the model takes the data and builds branches where the data is split and a decision is made. This occurs multiple times until we get to the final classification. The tree continues to “grow” until the maximum tree depth (that was set) is achieved. The prediction is made based on what bin an observation ends up in.\nClassification trees are easy to interpret, since the decision at each step is easy to visualize. Numeric predictors do not need to be centered or scaled. However, classification trees can become overfit by memorizing the training data and then become poor generalizers.\n\n\nWhy could we consider Classification Trees with our data?\nClassification Trees should be considered with our data since we have a binary response variable. Also, we do not need to do any prepossessing of our data, since we have categorical predictors (alone with our response)."
   },
   {
     "objectID": "modeling.html#random-forest",
     "href": "modeling.html#random-forest",
     "title": "Modeling Diabetes",
     "section": "Random Forest:",
-    "text": "Random Forest:\n\nDefining what Random Forest Models Are:\n\n\nWhy could we consider Random Forests with our data?"
+    "text": "Random Forest:\n\nDefining what Random Forest Models Are:\nRandom forest models are ensemble learning models where multiple decision trees are combined to make a prediction. During the training of the model, many trees are built and the final prediction is based on an aggregate of all of individual trees. The final predication is based on the average prediction or majority of the classification. Random Forest models are similar to classification trees, but they normally use bootstrap aggregation where each tree is training on a random subset of data. Also, at each decision point, a random subset of variables are considered (not all variables).\nThe advantage of random forest models over a classification tree is that there is normally higher accuracy due to the randomness of the training data. Also, there is likely less variance and reduced overfitting.\nOn the other hand, random forest models do require a high cost to compute.\n\n\nWhy could we consider Random Forests with our data?\nA Random Forest Model could be considered for our data since they can predict a binary outcome. Also, the random forest model would likely create a better model than a classification tree, due to the ensemble nature of the model."
   },
   {
     "objectID": "modeling.html#comparing-the-3-models-and-selecting-the-best-model",
