@@ -47,17 +47,17 @@ We will use a 70/30 split of our data to create training and testing data.
 
 ```{r}
 set.seed(145) 
-#diabetes_split <- initial_split(diabetes_summarize, prop = 0.7)
+diabetes_split <- initial_split(diabetes_summarize, prop = 0.7)
 
-#training_diabetes <- training(diabetes_split)
-#testing_diabetes <- testing(diabetes_split)
+training_diabetes <- training(diabetes_split)
+testing_diabetes <- testing(diabetes_split)
 
 ```
 
 For all models we are going to evaluate, we are going to use `logLoss` as our `metric`. To select the best model, we will also perform a 5 fold cross-validation. 
 
 ```{r}
-#cv_5 <- trainControl(method = "cv", number = 5) 
+cv_5 <- trainControl(method = "cv", number = 5) 
 ```
 
 ## Logistic Regression Models:
