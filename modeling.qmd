@@ -32,74 +32,388 @@ The variables are now (this is utilizing the renamed variables):
     -   35 to 40 kg/m\^2 = Class 2 Obesity
 
     -   \> 40 kg/m\^2 = Severe Obesity \### Splitting our Data
-    
-## Loading Packages
+
+## Loading Packages and Data
 
 ```{r}
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(tidymodels))
-suppressPackageStartupMessages(library(caret))
+suppressPackageStartupMessages(library(yardstick))
+suppressPackageStartupMessages(library(tibble))
+
+diabetes_data_df <- read.csv("~/ST558 Repo/Final Project/diabetes_binary_health_indicators_BRFSS2015.csv", header = TRUE)
+diabetes_data <- as.tibble(diabetes_data_df) #convert to a tibble, likely needed later
+diabetes_data
+```
+
+We will also manipulate data similar to the EDA for ease of modeling:
+
+```{r}
+diabetes_model_data <- diabetes_data |> 
+  select(Diabetes_binary, BMI, Veggies, PhysActivity, HvyAlcoholConsump) |> 
+  mutate(diabetes = factor(Diabetes_binary, levels = c(0,1), #create factors of the binary variables
+                             labels = c("No", "Yes")),
+         veggies = factor(Veggies, levels = c(0,1), 
+                          labels = c("No", "Yes")),
+         exercise = factor(PhysActivity, levels = c(0,1),
+                           labels = c("No", "Yes")),
+         alcohol_use = factor(HvyAlcoholConsump, levels = c(0,1),
+                        labels = c("No", "Yes"))) |> 
+  #creating a factor for BMI, need to figure make categories then factor so will do separately for ease of code
+  #want factor so they are ordered appropriate during analysis
+  mutate(BMI_category = case_when(
+    BMI < 18.5 ~ "Underweight",
+    BMI >= 18.5 & BMI < 25 ~ "Healthy Weight",
+    BMI >= 25 & BMI < 30 ~ "Overweight",
+    BMI >= 30 & BMI < 35 ~ "Class 1 Obesity",
+    BMI >= 35 & BMI <=40 ~ "Class 2 Obesity",
+    BMI > 40 ~ "Severe Obesity")) |> 
+  mutate(bmi = factor(BMI_category, levels = c(
+      "Underweight",
+      "Healthy Weight",
+      "Overweight",
+      "Class 1 Obesity",
+      "Class 2 Obesity",
+      "Severe Obesity"
+    ), ordered = TRUE)
+  ) |> 
+  select(diabetes, veggies, exercise, alcohol_use, bmi)
+
+diabetes_model_data
+            
 ```
 
 ## Setting up the Data for Modeling
 
-We will use a 70/30 split of our data to create training and testing data. 
+We will use a 70/30 split of our data to create training and testing data.
 
 ```{r}
 set.seed(145) 
-#diabetes_split <- initial_split(diabetes_summarize, prop = 0.7)
+diabetes_split <- initial_split(diabetes_model_data, prop = 0.7)
 
-#training_diabetes <- training(diabetes_split)
-#testing_diabetes <- testing(diabetes_split)
+training_diabetes <- training(diabetes_split)
+testing_diabetes <- testing(diabetes_split)
 
 ```
 
-For all models we are going to evaluate, we are going to use `logLoss` as our `metric`. To select the best model, we will also perform a 5 fold cross-validation. 
+For all models we are going to evaluate, we are going to use `logLoss` as our `metric`. To select the best model, we will also perform a 5 fold cross-validation.
 
 ```{r}
-#cv_5 <- trainControl(method = "cv", number = 5) 
+diabetes_5_fold <- vfold_cv(training_diabetes, 5)
 ```
 
 ## Logistic Regression Models:
 
 ### Defining what Logistic Regression Models Are:
 
-Logistic Regression Models are used when we have a binary response variable and we are performing a classification task. Since we are targeting a response that is a success vs. failure (or yes vs. no), we are modeling the probability of the response given some prediction variables. 
+Logistic Regression Models are used when we have a binary response variable and we are performing a classification task. Since we are targeting a response that is a success vs. failure (or yes vs. no), we are modeling the probability of the response given some prediction variables.
 
-When modeling the probability in the case of logistic regression, predictions would be between 0 and 1. The log-odds of the event is what is plotted during a logistic regression model. 
+When modeling the probability in the case of logistic regression, predictions would be between 0 and 1. The log-odds of the event is what is plotted during a logistic regression model.
 
-In logistic regression, we are not trying to predict an actual value, but the probability of the response variable occurring. 
+In logistic regression, we are not trying to predict an actual value, but the probability of the response variable occurring.
 
-Predictors can be either numeric or categorical when performing a logistic regression. If using a numeric predictor, it should be centered and scaled prior to fitting the model. 
+Predictors can be either numeric or categorical when performing a logistic regression. If using a numeric predictor, it should be centered and scaled prior to fitting the model.
 
 ### Why should Logistic Regression Models be applied to our Diabetes Data?
 
-We can apply a logistic regression model for our diabetes response variable since it is binary. The outcome is either a subject has prediabetes/diabetes or they do not. The goal of our model is to use prediction variables to identify the probability a subject will have the response variable of the disease. 
+We can apply a logistic regression model for our diabetes response variable since it is binary. The outcome is either a subject has prediabetes/diabetes or they do not. The goal of our model is to use prediction variables to identify the probability a subject will have the response variable of the disease.
+
+### Exploring our Model with Logisic Regression:
+
+We will test out 3 different models and select the best 1 using logistic regression. Presence of Prediabetes/Diabetes is our target prediction.
+
+-   Model 1: `BMI` + `veggies` + `alcohol_use` + `exercise`
+
+    -   This will be a model with all variables. No interactions here. Just seeing a model with all of our chosen variables.
+
+-   Model 2: `bmi` + `exercise` + `veggies`
+
+    -   It is known that having healthy weight and regular exercise reduces the risk of Type 2 Diabetes. In this model, we will evaulate those 2 variables. There will also be an interaction between the 2, since it could be possible that lower BMIs may exercise more. Also, adding in if vegetables are part of the diet may just indicate overall healthier individuals. We will also model an interaction with all 3 of these variables.
+
+-   Model 3: `veggies` + `alcohol_use` + `exercise`
+
+    -   This model will again be using variables that if someone has a better diet, exercises, and does not have heavy alcohol use, they should theoretically have lower risk of diabetes. It would be interesting to see the effect of all 3. We will add in an interaction with just `alcohol_use` and `exercise`.
+
+### Model Evaluation:
+
+Creating the recipes for each model below:
+
+```{r}
+lr_diabetes_1 <- recipe(diabetes ~ ., data = training_diabetes) |> 
+  step_dummy(all_nominal_predictors()) #all need to be dummy, no numeric variables
+
+lr_diabetes_2 <- recipe(diabetes ~ bmi + exercise + veggies, data = training_diabetes) |> 
+  step_dummy(all_nominal_predictors()) |> 
+  step_interact(terms = ~ starts_with("bmi"):starts_with("exercise")) |> 
+  step_interact(terms = ~ starts_with("bmi"):starts_with("exercise"):starts_with("veggies"))
+
+lr_diabetes_3 <- recipe(diabetes ~ veggies + alcohol_use + exercise, data = training_diabetes) |> 
+  step_dummy(all_nominal_predictors()) |> 
+  step_interact(terms = ~ starts_with("alcohol_use"):starts_with("exercise"):starts_with("veggies")) |> 
+  step_interact(terms = ~ starts_with("alcohol_use"):starts_with("exercise"))
+
+lr_diabetes_1
+lr_diabetes_2
+lr_diabetes_3
+```
+
+Now let's set up our model:
+
+```{r}
+lr_diabetes <- logistic_reg() |> 
+  set_engine("glm")
+```
+
+Then create the workflow for our 3 models:
+
+```{r}
+lr_1_wf <- workflow() |> 
+  add_recipe(lr_diabetes_1) |> 
+  add_model(lr_diabetes)
+lr_2_wf <- workflow() |> 
+  add_recipe(lr_diabetes_2) |> 
+  add_model(lr_diabetes)
+lr_3_wf <- workflow() |> 
+  add_recipe(lr_diabetes_3) |> 
+  add_model(lr_diabetes)
+```
+
+Fit our CV folds we created prior. We will use the metric of `logLoss`:
+
+```{r}
+lr_1_fit <- lr_1_wf |> 
+  fit_resamples(diabetes_5_fold, metrics = metric_set(mn_log_loss))
+lr_2_fit <- lr_2_wf |> 
+  fit_resamples(diabetes_5_fold, metrics = metric_set(mn_log_loss))
+lr_3_fit <- lr_3_wf |> 
+  fit_resamples(diabetes_5_fold, metrics = metric_set(mn_log_loss))
+```
+
+Next, let's collect the metrics of our models
+
+```{r}
+rbind(lr_1_fit |> collect_metrics(),
+      lr_2_fit |> collect_metrics(),
+      lr_3_fit |> collect_metrics()) |> 
+  mutate(Model = c("Model 1", "Model 2", "Model 3")) |> 
+  select(Model, everything())
+```
+
+It looks like Model 1 is the best, but just barely. This indicates that each of these predictors `veggies`, `alcohol_use`, `exercise`, and `bmi` all independently effect whether a subject has prediabetes or diabetes. In these models, the interactions likely made the model too complex and did not increase the ability to predict, so here the simpler model won.
+
+Here is our final fit on the full training data:
+
+```{r}
+final_lr_diabetes <- lr_1_wf |> 
+  fit(training_diabetes)
+
+final_lr_diabetes
+```
 
 ## Classification Tree:
 
 ### Defining what Classification Tree Models Are:
 
-Classification trees are used to classify a group membership, or in other words, predict whether a binary outcome will occur. Basically the model takes the data and builds branches where the data is split and a decision is made. This occurs multiple times until we get to the final classification. The tree continues to "grow" until the maximum tree depth (that was set) is achieved. The prediction is made based on what bin an observation ends up in. 
+Classification trees are used to classify a group membership, or in other words, predict whether a binary outcome will occur. Basically the model takes the data and builds branches where the data is split and a decision is made. This occurs multiple times until we get to the final classification. The tree continues to "grow" until the maximum tree depth (that was set) is achieved. The prediction is made based on what bin an observation ends up in.
 
-Classification trees are easy to interpret, since the decision at each step is easy to visualize. Numeric predictors do not need to be centered or scaled. However, classification trees can become overfit by memorizing the training data and then become poor generalizers. 
+Classification trees are easy to interpret, since the decision at each step is easy to visualize. Numeric predictors do not need to be centered or scaled. However, classification trees can become overfit by memorizing the training data and then become poor generalizers.
 
 ### Why could we consider Classification Trees with our data?
 
 Classification Trees should be considered with our data since we have a binary response variable. Also, we do not need to do any prepossessing of our data, since we have categorical predictors (alone with our response).
 
+### Model Evaluation
+
+Now we will fit a classification tree. First we will need to create the recipe, but we can use our initial recipe from above since we do not need to worry above interactions.
+
+Let's first define the model and engine.
+
+```{r}
+tree_model <- decision_tree(tree_depth = tune(),
+                            min_n = tune(),
+                            cost_complexity = tune()) |> 
+  set_engine("rpart") |> 
+  set_mode("classification")
+```
+
+Then create the workflow:
+
+```{r}
+tree_wrkf <- workflow() |> 
+  add_recipe(lr_diabetes_1) |> 
+  add_model(tree_model)
+```
+
+Next we will use our CV folds to select the tuning parameters. We are only interested in `logLoss` as our metric, so also indicating that here:
+
+```{r}
+log_loss_metric <- metric_set(mn_log_loss)
+
+tree_grid <- tree_wrkf |> 
+  tune_grid(
+    resamples = diabetes_5_fold,
+    metrics = log_loss_metric)
+
+tree_grid_f <- tree_grid |> 
+  collect_metrics()
+
+tree_grid_f
+```
+
+Now that we generated some tuning parameters, let's identify the best model.
+
+```{r}
+tree_best <- tree_grid_f |> 
+  filter(.metric == "mn_log_loss") |> 
+  arrange(mean) |> 
+  slice(1)
+
+tree_best
+```
+
+Now we will need to finalize our workflow with the best tree:
+
+```{r}
+final_tree_wf<- finalize_workflow(tree_wrkf, tree_best)
+
+final_tree_diabetes <- final_tree_wf |> 
+  fit(training_diabetes)
+
+final_tree_wf
+final_tree_diabetes
+```
+
 ## Random Forest:
 
 ### Defining what Random Forest Models Are:
 
-Random forest models are ensemble learning models where multiple decision trees are combined to make a prediction. During the training of the model, many trees are built and the final prediction is based on an aggregate of all of individual trees. The final predication is based on the average prediction or majority of the classification. Random Forest models are similar to classification trees, but they normally use bootstrap aggregation where each tree is training on a random subset of data. Also, at each decision point, a random subset of variables are considered (not all variables). 
+Random forest models are ensemble learning models where multiple decision trees are combined to make a prediction. During the training of the model, many trees are built and the final prediction is based on an aggregate of all of individual trees. The final predication is based on the average prediction or majority of the classification. Random Forest models are similar to classification trees, but they normally use bootstrap aggregation where each tree is training on a random subset of data. Also, at each decision point, a random subset of variables are considered (not all variables).
 
-The advantage of random forest models over a classification tree is that there is normally higher accuracy due to the randomness of the training data. Also, there is likely less variance and reduced overfitting. 
+The advantage of random forest models over a classification tree is that there is normally higher accuracy due to the randomness of the training data. Also, there is likely less variance and reduced overfitting.
 
-On the other hand, random forest models do require a high cost to compute. 
+On the other hand, random forest models do require a high cost to compute.
 
 ### Why could we consider Random Forests with our data?
 
-A Random Forest Model could be considered for our data since they can predict a binary outcome. Also, the random forest model would likely create a better model than a classification tree, due to the ensemble nature of the model. 
+A Random Forest Model could be considered for our data since they can predict a binary outcome. Also, the random forest model would likely create a better model than a classification tree, due to the ensemble nature of the model.
+
+### Model Evaluation
+
+Now let's fit our model. Since we don't have to worry about interactions with random forest models, we can use the recipe from above.
+
+Let's first create our model:
+
+```{r}
+rf_model <- rand_forest(mtry = tune()) |> 
+  set_engine("ranger") |> 
+  set_mode("classification")
+```
+
+Then we will make our workflow:
+
+```{r}
+rf_wrkf <- workflow() |> 
+  add_recipe(lr_diabetes_1) |> 
+  add_model(rf_model)
+```
+
+Now fit our CV folds:
+
+```{r}
+rf_fit <- rf_wrkf |> 
+  tune_grid(resamples = diabetes_5_fold,
+            grid = 7,
+            metrics = metric_set(mn_log_loss))
+
+rf_fit |> 
+  collect_metrics() |> 
+  filter(.metric == "mn_log_loss") |> 
+  arrange(mean)
+```
+
+Now select the mode with the best parameters:
+
+```{r}
+rf_best <- select_best(rf_fit, metric = "mn_log_loss")
+rf_best
+```
+
+Now we will create our final workflow:
+
+```{r}
+final_rf_wf <- finalize_workflow(rf_wrkf, rf_best)
+
+final_rf_diabetes <- final_rf_wf |> fit(training_diabetes)
+
+final_rf_wf
+final_rf_diabetes
+```
 
 ## Comparing the 3 Models and Selecting the Best Model
+
+From our logistic regression model `lr_1_fit` was the best. This was the simple model with all 4 predictors set an independent variables. Below are the results with the `logloss` of 0.3745.
+
+```{r}
+lr_1_fit |> collect_metrics()
+```
+
+From our classification tree, our best model was `tree_best`. The parameters are below. It looks like we have a cost complexity of 1\^-10, a depth of 5, and the min_n of 18. This model produced a `logloss` of 0.4045.
+
+```{r}
+tree_best
+```
+
+And finally here is our best random forest model:
+
+```{r}
+rf_best
+```
+
+Now let's fit our 3 best models to the testing data to evaluate the best model:
+
+Let's predict based on the test data:
+
+```{r}
+predict_lr <- predict(final_lr_diabetes, #predict based on final lr model
+                      testing_diabetes,  #test data
+                      type = "prob") |>  #goal is probabilities
+  bind_cols(testing_diabetes)
+predict_tree <- predict(final_tree_diabetes, #repeat as above for tree
+                      testing_diabetes, 
+                      type = "prob") |> 
+  bind_cols(testing_diabetes)
+predict_rf <- predict(final_rf_diabetes, #repeat for random forest
+                    testing_diabetes, 
+                    type = "prob") |> 
+  bind_cols(testing_diabetes)
+
+predict_lr
+predict_tree
+predict_rf
+```
+
+Now we need to calculate the log loss for each:
+
+```{r}
+logloss_lr <- mn_log_loss(predict_lr, truth = diabetes, .pred_Yes) #calculating log loss
+  #above needs the prediction, then the truth (diabetes column) and .pred_Yes indicated predicted probabilities
+logloss_tree <- mn_log_loss(predict_tree, truth = diabetes, .pred_Yes)
+logloss_rf <- mn_log_loss(predict_rf, truth = diabetes, .pred_Yes)
+
+logloss_lr
+logloss_tree
+logloss_rf
+```
+
+Here are the final model results:
+
+```{r}
+results_diabetes_models <- tibble(
+  Model = c("Logistic Regression", "Classification Tree", "Random Forest"),
+  LogLoss = c(logloss_lr$.estimate, logloss_tree$.estimate, logloss_rf$.estimate)
+)
+
+print(results_diabetes_models)
+```
+
+Overall, the classification tree was the best model since it's LogLoss was lowest at 1.715. I did not expect the classification tree to perform best, since above it was described how classification trees can overfit data. I wonder if since we only used 1 metric, the potentially overfit model performed best. If we chose more metrics, maybe we would have had a different outcome and another model would've performed better. 
