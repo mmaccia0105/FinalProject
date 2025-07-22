@@ -296,7 +296,6 @@ ggplot(diabetes_summarize, aes(x = as.numeric(bmi), y = as.numeric(diabetes == "
 
 This graphs help with some of our modeling ideas. Plotting a logistic line comparing the probability of having diabetes based on BMI category, as BMI increases, the likelihood of diabetes increases, which makes sense.
 
+
+
 [Click here for the Modeling Page](https://mmaccia0105.github.io/FinalProject/modeling.html)
-
-
-

@@ -80,7 +80,9 @@ diabetes_model_data <- diabetes_data |>
   select(diabetes, veggies, exercise, alcohol_use, bmi)
 
 diabetes_model_data
-            
+
+#write to .csv to use later
+write_csv(diabetes_model_data, "~/ST558 Repo/Final Project/model_data.csv")
 ```
 
 ## Setting up the Data for Modeling
@@ -417,3 +419,10 @@ print(results_diabetes_models)
 ```
 
 Overall, the classification tree was the best model since it's LogLoss was lowest at 1.715. I did not expect the classification tree to perform best, since above it was described how classification trees can overfit data. I wonder if since we only used 1 metric, the potentially overfit model performed best. If we chose more metrics, maybe we would have had a different outcome and another model would've performed better. 
+
+```{r}
+#save the model to use later
+
+saveRDS(final_tree_diabetes, file = file.path("~", "ST558 Repo", "Final Project", "best_diabetes_model.rds"))
+```
+
