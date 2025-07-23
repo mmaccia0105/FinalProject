@@ -13,11 +13,11 @@ Overall, there were 21 variables, but it was decided to select only 4 to utilize
 
 The variables are now (this is utilizing the renamed variables):
 
--   `exercise`: Did the subject have physical activity within the past 30 days (excluding job activities)
+-   `exercise`: Did the subject have physical activity within the past 30 days (excluding job activities)?
 
--   `veggies`: Did the subject consume 1 or more vegetables in the past 30 days
+-   `veggies`: Did the subject consume 1 or more vegetables in the past 30 days?
 
--   `alcohol_use`: Did the subject consume ≥ 14 (male) or ≥ 7 (female) drinks per week
+-   `alcohol_use`: Did the subject consume ≥ 14 (male) or ≥ 7 (female) drinks per week?
 
 -   `bmi`: Body Mass Index (classifications below)
 
@@ -40,9 +40,11 @@ suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(tidymodels))
 suppressPackageStartupMessages(library(yardstick))
 suppressPackageStartupMessages(library(tibble))
+suppressPackageStartupMessages(library(bonsai))
+suppressPackageStartupMessages(library(partykit))
 
 diabetes_data_df <- read.csv("~/ST558 Repo/Final Project/diabetes_binary_health_indicators_BRFSS2015.csv", header = TRUE)
-diabetes_data <- as.tibble(diabetes_data_df) #convert to a tibble, likely needed later
+diabetes_data <- as_tibble(diabetes_data_df) #convert to a tibble, likely needed later
 diabetes_data
 ```
 
@@ -75,14 +77,14 @@ diabetes_model_data <- diabetes_data |>
       "Class 1 Obesity",
       "Class 2 Obesity",
       "Severe Obesity"
-    ), ordered = TRUE)
+    ))
   ) |> 
   select(diabetes, veggies, exercise, alcohol_use, bmi)
 
 diabetes_model_data
 
 #write to .csv to use later
-write_csv(diabetes_model_data, "~/ST558 Repo/Final Project/model_data.csv")
+saveRDS(diabetes_model_data, "~/ST558 Repo/Final Project/model_data.rds")
 ```
 
 ## Setting up the Data for Modeling
@@ -108,7 +110,7 @@ diabetes_5_fold <- vfold_cv(training_diabetes, 5)
 
 ### Defining what Logistic Regression Models Are:
 
-Logistic Regression Models are used when we have a binary response variable and we are performing a classification task. Since we are targeting a response that is a success vs. failure (or yes vs. no), we are modeling the probability of the response given some prediction variables.
+Logistic Regression Models are used when we have a binary response variable and are performing a classification task. Since we are targeting a response that is a success vs. failure (or yes vs. no), we are modeling the probability of the response given some prediction variables.
 
 When modeling the probability in the case of logistic regression, predictions would be between 0 and 1. The log-odds of the event is what is plotted during a logistic regression model.
 
@@ -118,7 +120,7 @@ Predictors can be either numeric or categorical when performing a logistic regre
 
 ### Why should Logistic Regression Models be applied to our Diabetes Data?
 
-We can apply a logistic regression model for our diabetes response variable since it is binary. The outcome is either a subject has prediabetes/diabetes or they do not. The goal of our model is to use prediction variables to identify the probability a subject will have the response variable of the disease.
+We can apply a logistic regression model for our diabetes response variable since it is binary. The outcome is either a subject has prediabetes/diabetes or they do not. The goal of our model is to use prediction variables to identify the probability a subject will have the response variable of the disease given our chosen predictors.
 
 ### Exploring our Model with Logisic Regression:
 
@@ -130,11 +132,19 @@ We will test out 3 different models and select the best 1 using logistic regress
 
 -   Model 2: `bmi` + `exercise` + `veggies`
 
-    -   It is known that having healthy weight and regular exercise reduces the risk of Type 2 Diabetes. In this model, we will evaulate those 2 variables. There will also be an interaction between the 2, since it could be possible that lower BMIs may exercise more. Also, adding in if vegetables are part of the diet may just indicate overall healthier individuals. We will also model an interaction with all 3 of these variables.
+    -   Interaction of `bmi` + `exercise`
+
+    -   Interaction of `bmi` + `exercise` + `veggies`
+
+    -   It is known that having healthy weight and regular exercise reduces the risk of Type 2 Diabetes. In this model, we will evaluate those 2 variables. There will also be an interaction between the 2, since it could be possible that lower BMIs may exercise more. Also, adding in if vegetables are part of the diet may just indicate overall healthier individuals. We will also model an interaction with all 3 of these variables. I wonder if all 3 would have an effect on each other and a subject's probability of having the outcome.
 
 -   Model 3: `veggies` + `alcohol_use` + `exercise`
 
-    -   This model will again be using variables that if someone has a better diet, exercises, and does not have heavy alcohol use, they should theoretically have lower risk of diabetes. It would be interesting to see the effect of all 3. We will add in an interaction with just `alcohol_use` and `exercise`.
+    -   Interaction of `alcohol_use` + `exercise`
+
+    -   Interaction of `alcohol_use` + `exercise` + `veggies`
+
+    -   This model will again be using variables that if someone has a better diet, exercises, and does not have heavy alcohol use, they should theoretically have lower risk of diabetes. It would be interesting to see the effect of all 3. We will add in an interaction with just `alcohol_use` and `exercise`. 
 
 ### Model Evaluation:
 
@@ -194,7 +204,7 @@ lr_3_fit <- lr_3_wf |>
 Next, let's collect the metrics of our models
 
 ```{r}
-rbind(lr_1_fit |> collect_metrics(),
+rbind(lr_1_fit |> collect_metrics(), #combine the metics from each formula
       lr_2_fit |> collect_metrics(),
       lr_3_fit |> collect_metrics()) |> 
   mutate(Model = c("Model 1", "Model 2", "Model 3")) |> 
@@ -216,7 +226,7 @@ final_lr_diabetes
 
 ### Defining what Classification Tree Models Are:
 
-Classification trees are used to classify a group membership, or in other words, predict whether a binary outcome will occur. Basically the model takes the data and builds branches where the data is split and a decision is made. This occurs multiple times until we get to the final classification. The tree continues to "grow" until the maximum tree depth (that was set) is achieved. The prediction is made based on what bin an observation ends up in.
+Classification trees are used to classify a group membership, or in other words, predict whether a binary outcome will occur. Basically the model takes the data and builds branches where the data is split and a decision is made. This occurs multiple times until we get to the final classification. The tree continues to "grow" until the maximum tree depth (that was set) is achieved. The prediction is made based on what bin an observation ends up in. Classification trees also have hyperparameters which can be tuned or set when setting up the model. 
 
 Classification trees are easy to interpret, since the decision at each step is easy to visualize. Numeric predictors do not need to be centered or scaled. However, classification trees can become overfit by memorizing the training data and then become poor generalizers.
 
@@ -226,23 +236,32 @@ Classification Trees should be considered with our data since we have a binary r
 
 ### Model Evaluation
 
-Now we will fit a classification tree. First we will need to create the recipe, but we can use our initial recipe from above since we do not need to worry above interactions.
+Now we will fit a classification tree. First we will need to create the recipe:
+
+```{r}
+tree_diabetes_form <- recipe(diabetes ~ ., data = training_diabetes)
+```
+
 
 Let's first define the model and engine.
 
 ```{r}
-tree_model <- decision_tree(tree_depth = tune(),
-                            min_n = tune(),
-                            cost_complexity = tune()) |> 
-  set_engine("rpart") |> 
-  set_mode("classification")
+#tree_model <- decision_tree(tree_depth = tune(), #allow for tuning of hyperparameters
+                        #    min_n = tune(),
+                        #    cost_complexity = tune()) |> 
+  #set_engine("rpart") |> 
+  #set_mode("classification")
+tree_model <- decision_tree() |>
+  set_engine("partykit") |>
+  set_mode("classification") 
+
 ```
 
 Then create the workflow:
 
 ```{r}
 tree_wrkf <- workflow() |> 
-  add_recipe(lr_diabetes_1) |> 
+  add_recipe(tree_diabetes_form) |> 
   add_model(tree_model)
 ```
 
@@ -289,7 +308,7 @@ final_tree_diabetes
 
 ### Defining what Random Forest Models Are:
 
-Random forest models are ensemble learning models where multiple decision trees are combined to make a prediction. During the training of the model, many trees are built and the final prediction is based on an aggregate of all of individual trees. The final predication is based on the average prediction or majority of the classification. Random Forest models are similar to classification trees, but they normally use bootstrap aggregation where each tree is training on a random subset of data. Also, at each decision point, a random subset of variables are considered (not all variables).
+Random forest models are ensemble learning models where multiple decision trees are combined to make a prediction. During the training of the model, many trees are built and the final prediction is based on an aggregate of all of individual trees. The final predication is based on the average prediction or majority of the classification. Random Forest models are similar to classification trees, but they normally use bootstrap aggregation where each tree is training on a random subset of data. Also, at each decision point, a random subset of variables are considered (not all variables). You also have the ability to tune for hyperparameters.
 
 The advantage of random forest models over a classification tree is that there is normally higher accuracy due to the randomness of the training data. Also, there is likely less variance and reduced overfitting.
 
@@ -301,7 +320,12 @@ A Random Forest Model could be considered for our data since they can predict a 
 
 ### Model Evaluation
 
-Now let's fit our model. Since we don't have to worry about interactions with random forest models, we can use the recipe from above.
+Now let's fit our model. Let's first create a formula:
+
+```{r}
+rf_diabetes_form <- recipe(diabetes ~ ., data = training_diabetes)
+```
+
 
 Let's first create our model:
 
@@ -315,7 +339,7 @@ Then we will make our workflow:
 
 ```{r}
 rf_wrkf <- workflow() |> 
-  add_recipe(lr_diabetes_1) |> 
+  add_recipe(rf_diabetes_form) |> 
   add_model(rf_model)
 ```
 
@@ -398,13 +422,11 @@ Now we need to calculate the log loss for each:
 
 ```{r}
 logloss_lr <- mn_log_loss(predict_lr, truth = diabetes, .pred_Yes) #calculating log loss
-  #above needs the prediction, then the truth (diabetes column) and .pred_Yes indicated predicted probabilities
+  #above needs the prediction, then the truth (diabetes column) and 
+  #.pred_Yes indicated predicted probabilities
 logloss_tree <- mn_log_loss(predict_tree, truth = diabetes, .pred_Yes)
 logloss_rf <- mn_log_loss(predict_rf, truth = diabetes, .pred_Yes)
 
-logloss_lr
-logloss_tree
-logloss_rf
 ```
 
 Here are the final model results:
@@ -418,11 +440,11 @@ results_diabetes_models <- tibble(
 print(results_diabetes_models)
 ```
 
-Overall, the classification tree was the best model since it's LogLoss was lowest at 1.715. I did not expect the classification tree to perform best, since above it was described how classification trees can overfit data. I wonder if since we only used 1 metric, the potentially overfit model performed best. If we chose more metrics, maybe we would have had a different outcome and another model would've performed better. 
+Overall, the logistic regression model performed well. I wonder if the simpler model won out, since all of our predictor variables are categorical, with 3 of them being binary. It also is likely that all of the chosen predictors do really independently affect a subject's probability of prediabetes or diabetes.
 
 ```{r}
 #save the model to use later
 
-saveRDS(final_tree_diabetes, file = file.path("~", "ST558 Repo", "Final Project", "best_diabetes_model.rds"))
-```
+saveRDS(final_lr_diabetes, file = file.path("~", "ST558 Repo", "Final Project", "best_diabetes_model.rds"))
 
+```

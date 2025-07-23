@@ -7,24 +7,26 @@ editor: visual
 
 ## Introduction to Diabetes
 
-Diabetes is a significant chronic medical condition which is becoming more and more prevalent in the United States. When people develop diabetes, they cannot regulate their blood glucose normally, which leads to reduced quality of life. When diabetes is not controlled, through diet and exercise, it can lead to additional medical problems. The main mechanism by which diabetes occurs, is that in a normal body, insulin is used to break down sugars from food into energy. In patients with diabetes, insulin is either not produced or does not work as normal leading to increase blood glucose. There are 2 types of diabetes.
+Diabetes is a significant chronic medical condition which is becoming more and more prevalent in the United States. When people develop diabetes, they cannot regulate their blood glucose normally, which leads to reduced quality of life. When diabetes is not controlled, through diet, exercise, and/or medication therapy it can lead to additional medical problems. The main mechanism by which diabetes occurs, is that in a normal body, insulin is used to break down sugars from food into energy. In patients with diabetes, insulin is either not produced or does not work as normal leading to increase blood glucose. There are 2 types of diabetes.
 
 -   Type 1 is normally genetic and the body does not produce insulin
 -   Type 2 is normally developed throughout life and while the body may produce insulin, it does not work as it should
 
 Additionally, diabetes can lead to cardiovascular and kidney complications. Also, patients are at risk for poor eyesight and wound healing.
 
-Diabetes continues to increase with upwards of 34 million people with diabetes and upwards of 88 million with pre-diabetes. Type 2 diabetes is really the version of concern, since its prevalence varies by age, education level, income status, location, race, and many other Social Drivers of Health (SDOH).
+Diabetes continues to increase, in the US, with upwards of 88 million with pre-diabetes and 34 million people with diabetes. Type 2 diabetes is really the version of concern, since its prevalence varies by age, education level, income status, location, race, and many other Social Drivers of Health (SDOH).
 
 ## Data of Concern
 
 The data explored through this analysis comes from the Behavioral Risk Factor Surveilance System (BRFSS); a telephone survey collected through the CDC annually. It has been conducted every year since 1984 and targets over 400,000 Americans. This data we will focus on is from the 2015 survey of 441,455 individuals with 330 feature.
 
-The specific dataset to explore is titled `diabetes_binary_health_indicators_BRFSS2015.csv`.
+The specific dataset to explore is titled `diabetes_binary_health_indicators_BRFSS2015.csv` and more information can be found [here](https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset).
 
 This specific set is of 253,680 responses. Here, the target variable is `Diabetes_binary` where `0` indicates no diabetes and `1` indicates the presence of diabetes or prediabetes. Overall, there are 21 variables.
 
 ## Variables to Explore Through Exploratory Data Analysis (EDA) & Modeling
+
+For this analysis and modeling, we are going to limit our scope and only explore 4 predictor variables. 
 
 ### *Target Variable:*
 
@@ -43,7 +45,7 @@ This specific set is of 253,680 responses. Here, the target variable is `Diabete
 -   `HvyAlcoholConsump`: Did the subject consume ≥ 14 (male) or ≥ 7 (female) drinks per week
     -   `0` = No
     -   `1` = Yes
--   `BMI`: Body Mass Index (will later create as a factor and breakdown the categories based on the CDC definition)
+-   `BMI`: Body Mass Index (will later create as a factor and breakdown the categories based on the CDC definition below)
     -   \< 18.5 kg/m\^2 = Underweight
 
     -   18.5 to \< 25 kg/m\^2 = Healthy Weight
@@ -58,13 +60,15 @@ This specific set is of 253,680 responses. Here, the target variable is `Diabete
 
 ### *Choice of Variables:*
 
-For my modeling, I decided on the above 4 variables. As a pharmacist, I know how the affect of some of these variables would affect someone's development of prediabetes and diabetes. Diet and exercise are some of the most important factors that a patient has direct control of, which can either lower or increase their risk of development of diabetes. As a result, I chose whether or not the subject has physical activity to indicate whether or not they live a sedentary lifestyle. Then I decided on their vegetable and alcohol consumption as addition variables to consider. If a patient increased their vegetable intake and / or decreased alcohol intake, they likely can reduce their risk of diabetes. Finally, I did choose BMI as a 4th variable. This is another factor a patient has control over and can lead to diabetes if they have higher BMIs. I also wanted at least 1 variable to be more than just binary, so BMI will be later converted to categories.
+For this model, 4 predictor variables weer chosen. As a pharmacist, I know how the affect of some of these variables would affect someone's development of prediabetes and diabetes. Diet and exercise are some of the most important factors that a patient has direct control of, which can either lower or increase their risk of development of diabetes. As a result, I chose whether or not the subject has physical activity to indicate whether or not they live a sedentary lifestyle. Then I decided on their vegetable and alcohol consumption as addition variables to consider. If a patient increased their vegetable intake and / or decreased alcohol intake, they likely can reduce their risk of diabetes. Finally, I did choose BMI as a 4th variable. This is another factor a patient has control over and can lead to diabetes if they have higher BMIs. I also wanted at least 1 variable to be more than just binary, so BMI will be later converted to categories.
+
+Ideally, these variables would have had more quantitative criteria, but the survey was very broad.  For example, it would've been more ideal to ask for how much exercise per week, not just if you had physical activity 1 time in a month. As a result, this model may not be a great predictor of someone having prediabetes or diabetes. 
 
 ## Purpose of this EDA and Model
 
 The purpose of this EDA is to explore some patients variables, through a survey, which may be associated with someone's development of prediabetes or diabetes. We want to examine our chosen variables to see if maybe visualize some relationships between the variables. Before modeling our data, we can also visualize some summary statistics to understand the composition of our subjects from this survey.
 
-After, we would then want to evaluate some different models, to identify the best one that can be used to predict if someone has prediabetes or diabetes. Different models will be evaluated since we want to create one that is accurate and is able to perform well on new data we provide, for example a different year of the survey. Ideally, a fit model would have lower error metrics and high accuracy.
+After, we would then want to evaluate some different models, to identify the best one that can be used to predict if someone has prediabetes or diabetes. Different types of models will be evaluated since we want to create one that is accurate and is able to perform well on new data we provide, for example a different year of the survey. Ideally, a fit model would have lower error metrics and high accuracy.
 
 ## Data Import/Clean Up
 
@@ -78,7 +82,7 @@ Let's import the data:
 
 ```{r}
 diabetes_data_df <- read.csv("~/ST558 Repo/Final Project/diabetes_binary_health_indicators_BRFSS2015.csv", header = TRUE)
-diabetes_data <- as.tibble(diabetes_data_df) #convert to a tibble, likely needed later
+diabetes_data <- as_tibble(diabetes_data_df) #convert to a tibble, likely needed later
 diabetes_data
 ```
 
@@ -98,7 +102,7 @@ diabetes_data_selected <- diabetes_data |>
 str(diabetes_data_selected)
 ```
 
-Now to make the data more readable, we will convert the variables to factors. The meaning of the 0 and 1's was described above. Additionally, the categories for BMI are above.
+Now to make the data more readable, we will convert the variables to factors. The meaning of the 0 and 1's were described above. Additionally, the categories for BMI are above.
 
 ```{r}
 diabetes_summarize <- diabetes_data_selected |> 
@@ -148,7 +152,7 @@ diabetes_summarize |>
   mutate(percent = round(n / sum(n) * 100, 2))
 ```
 
-This breakdown actually surprises me. I thought the presence of prediabetes or diabetes in this survey would've been higher.
+This breakdown actually surprises me. I thought the presence of prediabetes or diabetes in this survey would've been higher, though this survey was from about 10 years ago, so that might be why.
 
 #### Does the subject eat vegetables?
 
@@ -178,7 +182,7 @@ diabetes_summarize |>
   mutate(percent = round(n / sum(n) * 100, 2))
 ```
 
-This amount who drink excessively is not surprising. This variable actually quantifies things better than the previous 2.
+This amount who drink excessively is not surprising. This variable actually quantifies things better than the previous 2, since its criteria is more specific. 
 
 #### Summary of BMI Categories
 
@@ -278,7 +282,7 @@ As expected, when looking at the percent of subjects within each BMI category, t
 
 ### Scatter Plot to Visual Diabetes Probability based on BMI
 
-Finally, lets look at a few scatter plots to see if we can visual some relationships a bit better than just the bar graphs.
+Finally, lets look at a scatter plot to see if we can visual the relationship between BMI and diabetes with something different than a bar graph.
 
 ```{r}
 #need to convert BMI to numeric. Also need to take the diabetes factor and convert to numeric for
@@ -295,7 +299,5 @@ ggplot(diabetes_summarize, aes(x = as.numeric(bmi), y = as.numeric(diabetes == "
 ```
 
 This graphs help with some of our modeling ideas. Plotting a logistic line comparing the probability of having diabetes based on BMI category, as BMI increases, the likelihood of diabetes increases, which makes sense.
-
-
 
 [Click here for the Modeling Page](https://mmaccia0105.github.io/FinalProject/modeling.html)
