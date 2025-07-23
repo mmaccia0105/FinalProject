@@ -443,7 +443,7 @@ print(results_diabetes_models)
 Overall, the logistic regression model performed well. I wonder if the simpler model won out, since all of our predictor variables are categorical, with 3 of them being binary. It also is likely that all of the chosen predictors do really independently affect a subject's probability of prediabetes or diabetes.
 
 ```{r}
-#save the model to use later
+#save the model to use later for our api
 
 saveRDS(final_lr_diabetes, file = file.path("~", "ST558 Repo", "Final Project", "best_diabetes_model.rds"))
 

@@ -896,7 +896,7 @@ OOB prediction error (Brier s.):  0.1126478 </code></pre>
 </div>
 <p>Overall, the logistic regression model performed well. I wonder if the simpler model won out, since all of our predictor variables are categorical, with 3 of them being binary. It also is likely that all of the chosen predictors do really independently affect a subject’s probability of prediabetes or diabetes.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a><span class="co">#save the model to use later</span></span>
+<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a><span class="co">#save the model to use later for our api</span></span>
 <span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb90-3"><a href="#cb90-3" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(final_lr_diabetes, <span class="at">file =</span> <span class="fu">file.path</span>(<span class="st">"~"</span>, <span class="st">"ST558 Repo"</span>, <span class="st">"Final Project"</span>, <span class="st">"best_diabetes_model.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
