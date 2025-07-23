@@ -871,11 +871,12 @@ OOB prediction error (Brier s.):  0.1126478 </code></pre>
 </div>
 <p>Now we need to calculate the log loss for each:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a>logloss_lr <span class="ot">&lt;-</span> <span class="fu">mn_log_loss</span>(predict_lr, <span class="at">truth =</span> diabetes, .pred_Yes) <span class="co">#calculating log loss</span></span>
-<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">#above needs the prediction, then the truth (diabetes column) and </span></span>
-<span id="cb87-3"><a href="#cb87-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">#.pred_Yes indicated predicted probabilities</span></span>
-<span id="cb87-4"><a href="#cb87-4" aria-hidden="true" tabindex="-1"></a>logloss_tree <span class="ot">&lt;-</span> <span class="fu">mn_log_loss</span>(predict_tree, <span class="at">truth =</span> diabetes, .pred_Yes)</span>
-<span id="cb87-5"><a href="#cb87-5" aria-hidden="true" tabindex="-1"></a>logloss_rf <span class="ot">&lt;-</span> <span class="fu">mn_log_loss</span>(predict_rf, <span class="at">truth =</span> diabetes, .pred_Yes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a>logloss_lr <span class="ot">&lt;-</span> <span class="fu">mn_log_loss</span>(predict_lr, <span class="at">truth =</span> diabetes, .pred_Yes) </span>
+<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">#calculating log loss</span></span>
+<span id="cb87-3"><a href="#cb87-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">#above needs the prediction, then the truth (diabetes column) and </span></span>
+<span id="cb87-4"><a href="#cb87-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">#.pred_Yes indicated predicted probabilities</span></span>
+<span id="cb87-5"><a href="#cb87-5" aria-hidden="true" tabindex="-1"></a>logloss_tree <span class="ot">&lt;-</span> <span class="fu">mn_log_loss</span>(predict_tree, <span class="at">truth =</span> diabetes, .pred_Yes)</span>
+<span id="cb87-6"><a href="#cb87-6" aria-hidden="true" tabindex="-1"></a>logloss_rf <span class="ot">&lt;-</span> <span class="fu">mn_log_loss</span>(predict_rf, <span class="at">truth =</span> diabetes, .pred_Yes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Here are the final model results:</p>
 <div class="cell">
@@ -898,7 +899,10 @@ OOB prediction error (Brier s.):  0.1126478 </code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a><span class="co">#save the model to use later for our api</span></span>
 <span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb90-3"><a href="#cb90-3" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(final_lr_diabetes, <span class="at">file =</span> <span class="fu">file.path</span>(<span class="st">"~"</span>, <span class="st">"ST558 Repo"</span>, <span class="st">"Final Project"</span>, <span class="st">"best_diabetes_model.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb90-3"><a href="#cb90-3" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(final_lr_diabetes, </span>
+<span id="cb90-4"><a href="#cb90-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">file =</span> <span class="fu">file.path</span>(<span class="st">"~"</span>, <span class="st">"ST558 Repo"</span>, </span>
+<span id="cb90-5"><a href="#cb90-5" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"Final Project"</span>, </span>
+<span id="cb90-6"><a href="#cb90-6" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"best_diabetes_model.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 

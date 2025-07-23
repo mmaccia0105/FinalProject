@@ -1,12 +1,15 @@
-
 #* @apiTitle Diabetes Prediction API
 #* @apiDescription This API predicts the probability of prediabetes or diabetes from some lifestyle predictions.
 
 library(plumber)
 library(tidyverse)
+library(tidymodels)
 #pull in data and model from modeling pages
-diabetes_api <- readRDS("~/ST558 Repo/Final Project/model_data.rds")
-diabetes_model <- readRDS("~/ST558 Repo/Final Project/best_diabetes_model.rds")
+#diabetes_api <- readRDS("~/ST558 Repo/Final Project/model_data.rds")
+#diabetes_model <- readRDS("~/ST558 Repo/Final Project/best_diabetes_model.rds")
+
+diabetes_api <- readRDS("model_data.rds")
+diabetes_model <- readRDS("best_diabetes_model.rds")
 
 #create our default values
 default_values <- diabetes_api |> 
@@ -19,9 +22,9 @@ default_values <- diabetes_api |>
 print(default_values) #can check in console results
 
 #* Predict probability of diabetes
-#* @param veggies Whether patient eats veggies (Yes/No)
-#* @param exercise Whether patient exercises (Yes/No)
-#* @param alcohol_use Whether patient uses alcohol (Yes/No)
+#* @param veggies Did the subject eat vegetables once in past 30 days (Yes/No)
+#* @param exercise Did the subject have physical activity (excluding job activities) within past 30 days  (Yes/No)
+#* @param alcohol_use Did the subject consume ≥ 14 (male) or ≥ 7 (female) drinks per week (Yes/No)
 #* @param bmi BMI category (Underweight, Healthy Weight, Overweight, Class 1 Obesity, Class 2 Obesity, Severe Obesity)
 #* @get /pred
 function(veggies = default_values$veggies, #function to take input, default was created above
@@ -30,7 +33,7 @@ function(veggies = default_values$veggies, #function to take input, default was 
          bmi = default_values$bmi) {
   
   #Construct a single-row tibble for prediction
-  #match facotr values from before
+  #match factor values from before to make model work 
   new_data <- tibble( 
     veggies = factor(veggies, levels = levels(diabetes_api$veggies)),
     exercise = factor(exercise, levels = levels(diabetes_api$exercise)),
@@ -38,9 +41,16 @@ function(veggies = default_values$veggies, #function to take input, default was 
     bmi = factor(bmi, levels = levels(diabetes_api$bmi))
   )
   
-  # Predict probability of diabetes = Yes from above inputs
+  # Predict probability of diabetes using above inputs. 
   prob <- predict(diabetes_model, new_data, type = "prob")$.pred_Yes #probability for yes
-  list(predicted_probability = round(prob, 4)) #round to 4 and return a named list
+  rounded_prob <- round(prob, 4) #round result to 4 digits
+  
+  #output the message - make a percent for easy reading
+  list(
+    message = paste0(
+      "Based on the inputs provided, the predicted probability of prediabetes or diabetes is ",
+      round(rounded_prob * 100, 1), "%.")
+  )
 }
 
 #* Info endpoint with author and GitHub Pages URL

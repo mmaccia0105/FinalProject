@@ -421,7 +421,8 @@ predict_rf
 Now we need to calculate the log loss for each:
 
 ```{r}
-logloss_lr <- mn_log_loss(predict_lr, truth = diabetes, .pred_Yes) #calculating log loss
+logloss_lr <- mn_log_loss(predict_lr, truth = diabetes, .pred_Yes) 
+  #calculating log loss
   #above needs the prediction, then the truth (diabetes column) and 
   #.pred_Yes indicated predicted probabilities
 logloss_tree <- mn_log_loss(predict_tree, truth = diabetes, .pred_Yes)
@@ -445,6 +446,9 @@ Overall, the logistic regression model performed well. I wonder if the simpler m
 ```{r}
 #save the model to use later for our api
 
-saveRDS(final_lr_diabetes, file = file.path("~", "ST558 Repo", "Final Project", "best_diabetes_model.rds"))
+saveRDS(final_lr_diabetes, 
+        file = file.path("~", "ST558 Repo", 
+                         "Final Project", 
+                         "best_diabetes_model.rds"))
 
 ```
