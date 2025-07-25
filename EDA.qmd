@@ -14,7 +14,7 @@ Diabetes is a significant chronic medical condition which is becoming more and m
 
 Additionally, diabetes can lead to multiple complications including cardiovascular, renal, vision, and poor wound healing.
 
-Diabetes continues to increase, in the US, with upwards of 88 million with pre-diabetes and 34 million people with diabetes. Type 2 diabetes is really the version of concern, since its prevalence varies by age, education level, income status, location, race, and many other Social Drivers of Health (SDOH).
+Diabetes continues to increase, in the US, with upwards of 88 million with pre-diabetes and 34 million people with diabetes. Type 2 diabetes is really the version of concern, since its prevalence varies by age, education level, income status, location, race, and many other Social Drivers of Health (SDOH).   
 
 ## Data of Concern
 
