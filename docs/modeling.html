@@ -222,7 +222,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Class 1 Obesity"</span>,</span>
 <span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Class 2 Obesity"</span>,</span>
 <span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Severe Obesity"</span></span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    ))</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    )) <span class="co">#left unordered since this seemed to affect model in the api</span></span>
 <span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
 <span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(diabetes, veggies, exercise, alcohol_use, bmi)</span>
 <span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a></span>
@@ -243,7 +243,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 10 No       Yes     No       No          Healthy Weight 
 # ℹ 253,670 more rows</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#write to .csv to use later</span></span>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#write to rds to use later</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(diabetes_model_data, <span class="st">"~/ST558 Repo/Final Project/model_data.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
@@ -274,6 +274,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="why-should-logistic-regression-models-be-applied-to-our-diabetes-data" class="level3">
 <h3 class="anchored" data-anchor-id="why-should-logistic-regression-models-be-applied-to-our-diabetes-data">Why should Logistic Regression Models be applied to our Diabetes Data?</h3>
 <p>We can apply a logistic regression model for our diabetes response variable since it is binary. The outcome is either a subject has prediabetes/diabetes or they do not. The goal of our model is to use prediction variables to identify the probability a subject will have the response variable of the disease given our chosen predictors.</p>
+<p>We are also able to set up our own interactions to see if the effect of some variables depend on another.</p>
 </section>
 <section id="exploring-our-model-with-logisic-regression" class="level3">
 <h3 class="anchored" data-anchor-id="exploring-our-model-with-logisic-regression">Exploring our Model with Logisic Regression:</h3>
@@ -444,7 +445,7 @@ predictor: 3</code></pre>
 </div>
 <p>Next, let’s collect the metrics of our models</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(lr_1_fit <span class="sc">|&gt;</span> <span class="fu">collect_metrics</span>(), <span class="co">#combine the metics from each formula</span></span>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(lr_1_fit <span class="sc">|&gt;</span> <span class="fu">collect_metrics</span>(), <span class="co">#combine the metrics from each formula</span></span>
 <span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>      lr_2_fit <span class="sc">|&gt;</span> <span class="fu">collect_metrics</span>(),</span>
 <span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>      lr_3_fit <span class="sc">|&gt;</span> <span class="fu">collect_metrics</span>()) <span class="sc">|&gt;</span> </span>
 <span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Model =</span> <span class="fu">c</span>(<span class="st">"Model 1"</span>, <span class="st">"Model 2"</span>, <span class="st">"Model 3"</span>)) <span class="sc">|&gt;</span> </span>

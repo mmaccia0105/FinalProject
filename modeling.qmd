@@ -77,13 +77,13 @@ diabetes_model_data <- diabetes_data |>
       "Class 1 Obesity",
       "Class 2 Obesity",
       "Severe Obesity"
-    ))
+    )) #left unordered since this seemed to affect model in the api
   ) |> 
   select(diabetes, veggies, exercise, alcohol_use, bmi)
 
 diabetes_model_data
 
-#write to .csv to use later
+#write to rds to use later
 saveRDS(diabetes_model_data, "~/ST558 Repo/Final Project/model_data.rds")
 ```
 
@@ -121,6 +121,8 @@ Predictors can be either numeric or categorical when performing a logistic regre
 ### Why should Logistic Regression Models be applied to our Diabetes Data?
 
 We can apply a logistic regression model for our diabetes response variable since it is binary. The outcome is either a subject has prediabetes/diabetes or they do not. The goal of our model is to use prediction variables to identify the probability a subject will have the response variable of the disease given our chosen predictors.
+
+We are also able to set up our own interactions to see if the effect of some variables depend on another. 
 
 ### Exploring our Model with Logisic Regression:
 
@@ -204,7 +206,7 @@ lr_3_fit <- lr_3_wf |>
 Next, let's collect the metrics of our models
 
 ```{r}
-rbind(lr_1_fit |> collect_metrics(), #combine the metics from each formula
+rbind(lr_1_fit |> collect_metrics(), #combine the metrics from each formula
       lr_2_fit |> collect_metrics(),
       lr_3_fit |> collect_metrics()) |> 
   mutate(Model = c("Model 1", "Model 2", "Model 3")) |> 
