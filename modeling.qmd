@@ -248,11 +248,6 @@ tree_diabetes_form <- recipe(diabetes ~ ., data = training_diabetes)
 Let's first define the model and engine.
 
 ```{r}
-#tree_model <- decision_tree(tree_depth = tune(), #allow for tuning of hyperparameters
-                        #    min_n = tune(),
-                        #    cost_complexity = tune()) |> 
-  #set_engine("rpart") |> 
-  #set_mode("classification")
 tree_model <- decision_tree() |>
   set_engine("partykit") |>
   set_mode("classification") 
